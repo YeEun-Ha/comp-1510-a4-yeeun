@@ -3,6 +3,11 @@ YeEun Ha
 A01298478
 """
 
+import random
+import itertools
+import operator
+import time
+
 
 def intro():
     print("""
@@ -73,16 +78,120 @@ Enjoy your journey🌻
           f"HP: {character_dictionary['HP']}, Attack power: {character_dictionary['Attack_power']}, Skill: {character_dictionary['Skill']} ]")
 
 
+def is_alive(character_dictionary: dict) -> bool:
+    if character_dictionary['HP'] > 0:
+        return True
+
+
+# ----------Below is building the basic map----------------
+
+
+def make_board(rows: int, columns: int) -> dict:
+    description = ['Empty room', 'Yay! Hot tea🍵', 'Wow! Weapon🔪']
+    coordinates_list = [(row, column) for row, column in itertools.product(range(rows), range(columns))]
+    choices_list = [random.choice(description) for _ in range(len(coordinates_list))]
+    board = dict(zip(coordinates_list, choices_list))
+    return board
+
+
+def make_map(rows: int, columns: int, character_dictionary: dict) -> str:
+    map_list = []
+    for row in range(rows):
+        for column in range(columns):
+            map_list.append('🔸')
+        map_list.append('\n')
+    map_list[0] = character_dictionary['Face']
+    map_list[-2] = '🕌'
+    return ''.join(map_list)
+
+
+def describe_current_location(character_dictionary: dict, made_board: dict, made_map: str):
+    user_location = character_dictionary['Location']
+    print(made_map)
+    print(f"Current location: {user_location}. There are: {made_board[user_location]}")
+
+    if made_board[user_location] == 'Yay! Hot tea🍵':
+        character_dictionary['HP'] += 2
+        print(f"→ HP + 2! Current [HP]:{character_dictionary['HP']}")
+    elif made_board[user_location] == 'Wow! Weapon🔪':
+        character_dictionary['Attack_power'] += 1
+        print(f"→ Attack power + 1! Current [Attack power]:{character_dictionary['Attack_power']}")
+    else:
+        return
+
+# ----------Below is moving characters on the map----------------
+
+
+def get_user_choice() -> tuple:
+    North_South_East_West = [(0, -1), (0, 1), (1, 0), (-1, 0)]
+    coordinates = dict(enumerate(North_South_East_West, 1))  # {1: (0, -1), 2: (0, 1), 3: (1, 0), 4: (-1, 0)}
+    while True:
+        user_input = input("""
+Which direction do you wanna go?
+(1) North
+(2) South
+(3) East
+(4) West
+(10) Quit the game
+""")
+        if user_input == '10':
+            print("OK, Bye!")
+            quit()
+        elif user_input in ['1', '2', '3', '4']:
+            return coordinates[int(user_input)] # type(coordinates[int(user_input)]) : <class 'tuple'>
+        else:                                   # I don't know why the error says the type of it is int..
+            print("Oops! Please choose among the four numbers above.\n")
+
+
+
+
+def validate_move(row: int, column: int, character_dictionary: dict, user_input: tuple) -> bool:
+    new_coordinate = tuple(map(operator.add, user_input, character_dictionary['Location']))
+    if 0 <= new_coordinate[0] < row and 0 <= new_coordinate[1] < column:
+        return True
+    else:
+        return False
+
+
+def move_character(character_dictionary: dict, user_input: tuple):
+    character_dictionary['Location'] = tuple(map(operator.add, user_input, character_dictionary['Location']))
+
+
+def make_new_map(character_dictionary:dict, previous_map: str, row: int) -> str:
+    map_list = list(previous_map)
+    map_list[map_list.index(character_dictionary['Face'])] = '🔸'
+
+    x_coordinate = character_dictionary['Location'][0]
+    y_coordinate = character_dictionary['Location'][1]
+    location_in_string_map = x_coordinate + y_coordinate * (row + 1)
+    map_list[location_in_string_map] = character_dictionary['Face']
+    return ''.join(map_list)
+
+
 def game(): # called from main
     intro()
     user_name = name_character()
     explain_characters()
     input_result = get_user_input()
-    dictionary_of_character = make_character(user_name, input_result)
-    print_user_choice(dictionary_of_character)
+    character = make_character(user_name, input_result)
+    print_user_choice(character)
 
     rows = 5
     columns = 5
+    board_description = make_board(rows, columns)
+    board_map = make_map(rows, columns, character)
+    describe_current_location(character, board_description, board_map)
+
+    boss_die = False
+    while is_alive(character) and not boss_die:
+        direction_input = get_user_choice()
+        is_valid = validate_move(rows, columns, character, direction_input)
+        if is_valid:
+            move_character(character, direction_input)
+            board_map = make_new_map(character, board_map, rows)
+            describe_current_location(character, board_description, board_map)
+        else:
+            print("\nYou can't go there! Choose another direction.")
 
 
 def main():
