@@ -10,6 +10,9 @@ import time
 
 
 def intro():
+    """
+    Print intro message.
+    """
     print("""
 Welcome to Yennie's Journey Game🦄
 The Journey Game is about an animal character😺 who is in the journey of 
@@ -18,11 +21,19 @@ saving its human buddy, Chris. He's captured in the Dark Castle!
 
 
 def name_character() -> str:
+    """
+    Get character name from user input.
+
+    :return: a string which is the character name
+    """
     character_name = input("➡ Name you character: ")
     return character_name
 
 
 def explain_characters():
+    """
+    Print character information.
+    """
     print("""
 There are 3 characters.
 1. Cat 😺
@@ -35,6 +46,13 @@ There are 3 characters.
 
 
 def add_user_to_character(user_name: str) -> list:
+    """
+    Creat a list of the character information.
+
+    :param user_name: a string
+    :precondition: user_name is from user input for the character name
+    :return: a list of dictionaries that contains the character information with user_name
+    """
     cat = {'Character': 'cat', 'Face': '😺', 'HP': 60, 'Attack_power': 10, 'Skill': 'scratching'}
     dog = {'Character': 'dog', 'Face': '🐶', 'HP': 45, 'Attack_power': 15, 'Skill': 'biting'}
     pig = {'Character': 'lovely pig', 'Face': '🐷', 'HP': 30, 'Attack_power': 20, 'Skill': 'ripping up'}
@@ -45,6 +63,11 @@ def add_user_to_character(user_name: str) -> list:
 
 
 def get_user_input() -> int:
+    """
+    Get user input for the character choice.
+
+    :return: an integer of the user input
+    """
     while True:
         user_input = input("""What is your choice?
 (1) Cat
@@ -58,6 +81,13 @@ def get_user_input() -> int:
 
 
 def make_character(user_name: str, user_input: int) -> dict:
+    """
+    Return a dictionary that contains all the information of the user character.
+
+    :param user_name: a string that contains the chosen name from name_character()
+    :param user_input: an integer that contains the chosen character's number from get_user_input()
+    :return: a dictionary that contains all the information of the user character
+    """
     user_character_list = add_user_to_character(user_name)
     characters_with_index = dict(enumerate(user_character_list, 1))
     return characters_with_index[user_input]
@@ -81,6 +111,12 @@ Enjoy your journey🌻
 
 
 def is_alive(character_dictionary: dict) -> bool:
+    """
+    Determine if the character is alive.
+
+    :param character_dictionary: a dictionary that contains all the information of the user character
+    :return: True is the chracter is alive, or False if not
+    """
     if character_dictionary['HP'] > 0:
         return True
 
@@ -89,6 +125,13 @@ def is_alive(character_dictionary: dict) -> bool:
 
 
 def make_board(rows: int, columns: int) -> dict:
+    """
+    Return a dictionary that contains the description of a cell in the map.
+
+    :param rows: a positive integer
+    :param columns: a positive integer
+    :return: a dictionary with tuple keys and string values pair
+    """
     description = ['Empty room', 'Yay! Hot tea🍵', 'Wow! Weapon🔪']
     coordinates_list = [(row, column) for row, column in itertools.product(range(rows), range(columns))]
     choices_list = [random.choice(description) for _ in range(len(coordinates_list))]
@@ -97,6 +140,14 @@ def make_board(rows: int, columns: int) -> dict:
 
 
 def make_map(rows: int, columns: int, character_dictionary: dict) -> str:
+    """
+    Create a board map.
+
+    :param rows: a positive integer
+    :param columns: a positive integer
+    :param character_dictionary: a dictionary that contains all the information of the user character
+    :return: a sting that looks like a map which is rows * columns sized
+    """
     map_list = []
     for row in range(rows):
         for column in range(columns):
@@ -108,6 +159,14 @@ def make_map(rows: int, columns: int, character_dictionary: dict) -> str:
 
 
 def describe_current_location(character_dictionary: dict, made_board: dict, made_map: str):
+    """
+    Print the map and the user location.
+
+    :param character_dictionary: a dictionary that contains all the information of the user character
+    :param made_board: a dictionary that contains the cell description
+    :param made_map: a string that shows the map
+    :post condition: prints the current location of the user in tuple and the map
+    """
     user_location = character_dictionary['Location']
     print(made_map)
     print(f"Current location: {user_location}. There are: {made_board[user_location]}")
@@ -125,6 +184,11 @@ def describe_current_location(character_dictionary: dict, made_board: dict, made
 
 
 def get_user_choice() -> tuple:
+    """
+    Get a user input of direction and return the changed location in tuple.
+
+    :return: a tuple that represents the direction that a user choose
+    """
     north_south_east_west = [(0, -1), (0, 1), (1, 0), (-1, 0)]
     coordinates = dict(enumerate(north_south_east_west, 1))  # {1: (0, -1), 2: (0, 1), 3: (1, 0), 4: (-1, 0)}
     while True:
@@ -146,6 +210,15 @@ Which direction do you wanna go?
 
 
 def validate_move(row: int, column: int, character_dictionary: dict, user_input: tuple) -> bool:
+    """
+    Determin if the user input of direction choice is valid.
+
+    :param row: a positive integer
+    :param column: a positive integer
+    :param character_dictionary: a dictionary that contains all the information of the user character
+    :param user_input: a tuple that represents the direction that a user choose
+    :return: True if user's changed location tuple is within the map
+    """
     new_coordinate = tuple(map(operator.add, user_input, character_dictionary['Location']))
     if 0 <= new_coordinate[0] < row and 0 <= new_coordinate[1] < column:
         return True
@@ -293,7 +366,8 @@ def hp_back(foe_dictionary:  dict):
 
 def defeat_boss(made_character: dict):
     boss = foes_list()[-1]
-    print(f"You finally encountered {boss['Name']}{boss['Face']}! It has {boss['HP']}HP and {boss['Attack_power']} attack power.\n")
+    print(f"You finally encountered {boss['Name']}{boss['Face']}! "
+          f"It has {boss['HP']}HP and {boss['Attack_power']} attack power.\n")
 
     attacker_generator = itertools.cycle(["user", "foe"])
     while boss['HP'] > 0 and made_character['HP'] > 0:
@@ -381,6 +455,7 @@ def game():
         else:
             print("\nYou can't go there! Choose another direction.")
     end_of_game(character)
+
 
 def main():
     game()
